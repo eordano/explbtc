@@ -1,0 +1,34 @@
+# explbtc
+
+Tool to explore Bitcoin transaction flows
+
+## Install
+
+```
+npm i
+brew install graphviz
+```
+
+## Usage
+
+Edit the `input` file and run:
+
+```
+node process.js > graph.dot && dot graph.dot -T pdf -O
+```
+
+## Example
+
+```
+add 19K2Y4dbT29wxQuaTgbKqm6n1iodcvY7pe
+add 1MgGdrKQ1fgueLWjjis9XSgyJTiYtHiVkJ
+add 1GxzbKHy9uFEB1qnJ8Wh9DSdqAGkcAeu74
+add 1FvSBE5hHNpKSt2f7hQiPbas6FX95w6Jo1
+add 3CUHonX6EfsTksMWiSpYoAYRzmkVriaYWd
+hide d7b9dd625d2d06ca4ef32a5bd07b93fa4459da641b3da861fc7831b87a8dfb94
+label d7b9dd625d2d06ca4ef32a5bd07b93fa4459da641b3da861fc7831b87a8dfb94 Heya
+add 3CvVybQtAWPCsnRb5NkgdSSLBX78ABGHYM
+hide 4331e5abefeec64b968bfe9b2561c4c986eb3b53f1e9776816d3deb6f1e5acbf
+```
+
+![preview](preview.png)

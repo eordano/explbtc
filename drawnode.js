@@ -1,23 +1,17 @@
-module.exports = function drawNode(node) {
-    if (node.type == 'tx') return drawTx(node)
-    if (node.type == 'add') return drawAddress(node)
-}
-
 const baseUrl = 'https://www.blockchain.com/en/btc/'
 
 function draw(node, idFn, labelFn, linkFn, extraFn) {
-    console.log(node)
     return `\t${
         idFn(node)
-    } [${
+    } [href="${
         linkFn(node)
-    } label=<<font color="blue">${
+    }" label=<<font color="blue">${
         labelFn(node)
     }</font>${
         customLabel(node)
     }${
         extraFn(node)
-    }\n`
+    }>]\n`
 }
 
 function drawTx(node) {
@@ -26,6 +20,11 @@ function drawTx(node) {
 
 function drawAddress(node) {
     return draw(node, addId, addLabel, addLink, () => '')
+}
+
+function customLabel(node) {
+    if (!node.label) return ''
+    return `<br/><br/>${node.label}`
 }
 
 function txId(node) {
@@ -37,7 +36,7 @@ function txLink(node) {
 }
 
 function txDate(node) {
-    return '\n\n' + new Date(node.time * 1000).toISOString().replace('T', ' ').substr(0,16)
+    return '<br/><br/>' + new Date(node.time * 1000).toISOString().replace('T', ' ').substr(0,16)
 }
 
 function txLabel(node) {
@@ -59,3 +58,8 @@ function addLabel(node) {
 function fourId(str) {
     return `${str.substr(0, 4)}...${str.substr(str.length - 4, 4)}`
 }
+module.exports = function drawNode(node) {
+    if (node.type == 'tx') return drawTx(node)
+    if (node.type == 'add') return drawAddress(node)
+}
+

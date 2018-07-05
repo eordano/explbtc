@@ -1,58 +1,31 @@
-const fs = require('fs')
-const fetch = require('isomorphic-fetch')
+const getData = require('./getData')
 
-const memCache = {}
-const baseUrl = 'https://blockchain.info/'
-
-module.exports = async function addAddress(address) {
-    return await ensureAddress(address)
-}
-
-if (!module.parent) {
-    module.exports('19K2Y4dbT29wxQuaTgbKqm6n1iodcvY7pe').then(e => console.log(JSON.stringify(e, null, 2)))
-}
-
-async function ensureAddress(address) {
-    if (memCache[address]) return memCache[address]
-    if (cacheHit(address)) return memCache[address] = readCache(address)
-    console.log(`Cache miss: ${address}.`)
-    let data
-    let offset = 0
-    let lastData
-    while (!lastData || lastData.txs.length == 50) {
-        console.log((offset === 0) ? 'Fetching...' : 'Fetching next page...')
-        lastData = await (await fetch(addressUrl(address, offset))).json()
-        if (!data) data = lastData
-        else data.txs.append(lastData.txs)
-        console.log(lastData)
-        offset += 50
+module.exports = async function addNode(graph, address) {
+    const data = await getData.address(address)
+    if (!graph.addresses[address]) graph.addresses[address] = {
+        id: address,
+        type: 'add',
+        show: true
     }
-    console.log(`Fetched ${data.txs.length} txs for ${address}`)
-    writeCache(address, data)
-    memCache[address] = data
-    return data
+    if (!graph.addresses[address].show) graph.addresses[address].show = true
+    for (let tx of data.txs) {
+        if (!graph.txs[tx.hash]) graph.txs[tx.hash] = { ...tx, id: tx.hash, type: 'tx' }
+        for (let input in tx.inputs) {
+            const addr = tx.inputs[input].prev_out.addr
+            addWeak(graph, addr)
+        }
+        for (let output in tx.out) {
+            const addr = tx.out[output].addr
+            addWeak(graph, addr)
+        }
+    }
 }
 
-function writeCache(name, data) {
-    fs.writeFileSync(cacheFile(name), JSON.stringify(data))
-}
-
-function cacheHit(name) {
-    return fs.existsSync(cacheFile(name))
-}
-
-function readCache(name) {
-    return JSON.parse(fs.readFileSync(cacheFile(name)))
-}
-
-function cacheFile(name) {
-    return '.cache/' + name
-}
-
-function addressUrl(address, offset) {
-    return baseUrl + 'rawaddr/' + address + '?offset=' + offset
-}
-
-function txUrl(tx) {
-    return baseUrl + 'rawtx/' + tx
+function addWeak(graph, addr) {
+    if (!graph.addresses[addr]) graph.addresses[addr] = {
+        id: addr,
+        type: 'add',
+        weak: 1
+    }
+    else graph.addresses[addr].weak += 1
 }
