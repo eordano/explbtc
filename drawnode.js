@@ -1,30 +1,37 @@
 const baseUrl = 'https://www.blockchain.com/en/btc/'
 
-function draw(node, idFn, labelFn, linkFn, extraFn) {
+function draw(node, idFn, labelFn, linkFn, extraLabel, extraStyle) {
     return `\t${
         idFn(node)
     } [href="${
         linkFn(node)
-    }" label=<<font color="blue">${
+    }" ${
+        extraStyle(node)
+    } label=<${
+        customLabel(node)
+    }<font color="blue">${
         labelFn(node)
     }</font>${
-        customLabel(node)
-    }${
-        extraFn(node)
+        extraLabel(node)
     }>]\n`
 }
 
 function drawTx(node) {
-    return draw(node, txId, txLabel, txLink, txDate)
+    return draw(node, txId, txLabel, txLink, txDate, () => '')
 }
 
 function drawAddress(node) {
-    return draw(node, addId, addLabel, addLink, () => '')
+    return draw(node, addId, addLabel, addLink, () => '', highlightShow)
+}
+
+function highlightShow(node) {
+    if (node.show) return 'style="bold"'
+    return ''
 }
 
 function customLabel(node) {
     if (!node.label) return ''
-    return `<br/><br/>${node.label}`
+    return `${node.label}<br/><br/>`
 }
 
 function txId(node) {
